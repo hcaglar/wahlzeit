@@ -36,13 +36,13 @@ public class EmailServer {
 	/**
 	 * 
 	 */
-	protected static final EmailServer REAL_INSTANCE = new EmailServer();
-	protected static final EmailServer NULL_INSTANCE = new NullEmailServer();
+	protected static EmailServer REAL_INSTANCE = null;
+	protected static EmailServer NULL_INSTANCE = null;
 
 	/**
 	 * 
 	 */
-	protected static EmailServer instance = getInstanceFromMode();
+	protected static EmailServer instance = null;
 	
 	/**
 	 * 
@@ -53,6 +53,11 @@ public class EmailServer {
 	 * 
 	 */
 	public static EmailServer getInstance() {
+		if(null == instance)
+		{
+			//Lazy initialization
+			instance = getInstanceFromMode();
+		}
 		return instance;
 	}
 	
@@ -61,9 +66,9 @@ public class EmailServer {
 	 */
 	public static EmailServer getInstanceFromMode() {
 		if (SysLog.isInProductionMode()) {
-			return REAL_INSTANCE;
+			return getRealInstance();
 		} else {
-			return NULL_INSTANCE;
+			return getNullInstance();
 		}
 	}
 
@@ -73,12 +78,33 @@ public class EmailServer {
 	public static void setInstance(EmailServer server) {
 		instance = server;
 	}
-	
+
 	/**
-	 * 
+	 * @methodtype get
 	 */
-	public static void setNullInstance() {
-		instance = NULL_INSTANCE;
+	protected static EmailServer getRealInstance() {
+
+		if (null == REAL_INSTANCE) {
+			REAL_INSTANCE = new EmailServer();
+		}
+		return REAL_INSTANCE;
+	}
+
+	/**
+	 * @methodtype get
+	 */
+	protected static EmailServer getNullInstance() {
+		if (null == NULL_INSTANCE) {
+			NULL_INSTANCE = new NullEmailServer();
+		}
+		return NULL_INSTANCE;
+	}
+
+	/**
+	 * @methodtype set
+	 */
+	public static void setInstanceToNullInstance() {
+		instance = getNullInstance();
 	}
 	
 	/**

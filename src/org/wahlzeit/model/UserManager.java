@@ -37,7 +37,7 @@ public class UserManager extends ObjectManager {
 	/**
 	 *
 	 */
-	protected static UserManager instance = new UserManager();
+	protected static final UserManager instance = new UserManager();
 
 	/**
 	 * 

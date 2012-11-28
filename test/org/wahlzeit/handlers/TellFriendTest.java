@@ -66,7 +66,7 @@ public class TellFriendTest extends HandlerTestCase {
 		WebPart part = handler.makeWebPart(session);
 		// no failure is good behavior
 		
-		EmailServer.setNullInstance(); // no emails please
+		EmailServer.setInstanceToNullInstance(); // no emails please
 		EmailAddress to = EmailAddress.getFromString("engel@himmel.de");
 		Map<String, String> args = new HashMap<String, String>();
 		args.put(TellFriendFormHandler.EMAIL_TO, to.asString());
