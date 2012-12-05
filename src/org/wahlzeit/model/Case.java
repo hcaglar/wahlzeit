@@ -33,6 +33,7 @@ public abstract class Case extends DataObject {
 	
 	/**
 	 * 0 is never returned, first value is 1
+	 * @Invariant(lastCaseId >= 0)
 	 */
 	protected static int lastCaseId = 0;
 	
@@ -40,13 +41,18 @@ public abstract class Case extends DataObject {
 	 * @methodtype get
 	 */
 	public static synchronized int getLastCaseId() {
+		assert (lastCaseId >= 0);
 		return lastCaseId;
 	}
 	
 	/**
 	 * @methodtype set
+	 * @Precondition (newId>=0)
+	 * newId is the column value in the ResultSet
+	 * if the value is SQL NULL, the value returned is 0
 	 */
 	public static synchronized void setLastCaseId(int newId) {
+		assert (newId >= 0) && (lastCaseId >= 0);
 		lastCaseId = newId;
 	}
 	
@@ -54,6 +60,7 @@ public abstract class Case extends DataObject {
 	 * @methodtype idiom
 	 */
 	public static synchronized int getNextCaseId() {
+		assert (lastCaseId >= 0);
 		return ++lastCaseId;
 	}
 

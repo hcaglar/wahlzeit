@@ -30,7 +30,7 @@ import org.wahlzeit.utils.*;
  * A photo represents a user-provided (uploaded) photo.
  * 
  * @author dirkriehle
- *
+ * 
  */
 public class Photo extends DataObject {
 
@@ -51,7 +51,7 @@ public class Photo extends DataObject {
 	public static final String STATUS = "status";
 	public static final String IS_INVISIBLE = "isInvisible";
 	public static final String UPLOADED_ON = "uploadedOn";
-	
+
 	/**
 	 * 
 	 */
@@ -59,14 +59,14 @@ public class Photo extends DataObject {
 	public static final int MAX_PHOTO_HEIGHT = 600;
 	public static final int MAX_THUMB_PHOTO_WIDTH = 105;
 	public static final int MAX_THUMB_PHOTO_HEIGHT = 150;
-	
+
 	/**
 	 * 
 	 */
 	protected PhotoId id = null;
-	
+
 	/**
-	 * 
+	 * @Invariant (ownerId >= 0)
 	 */
 	protected int ownerId = 0;
 	protected String ownerName;
@@ -78,14 +78,14 @@ public class Photo extends DataObject {
 	protected EmailAddress ownerEmailAddress = EmailAddress.NONE;
 	protected Language ownerLanguage = Language.ENGLISH;
 	protected URL ownerHomePage;
-	
+
 	/**
-	 * 
+	 * @Invariant (width >= 0) && (height >= 0)
 	 */
-	protected int width;
-	protected int height;
+	protected int width = 0;
+	protected int height = 0;
 	protected PhotoSize maxPhotoSize = PhotoSize.MEDIUM; // derived
-	
+
 	/**
 	 * 
 	 */
@@ -95,36 +95,39 @@ public class Photo extends DataObject {
 	 * 
 	 */
 	protected PhotoStatus status = PhotoStatus.VISIBLE;
-	
+
 	/**
 	 * 
 	 */
 	protected int praiseSum = 10;
 	protected int noVotes = 1;
-	
+
 	/**
 	 * 
 	 */
 	protected long creationTime = System.currentTimeMillis();
-	
+
 	/**
-	 * 
+	 * @Ensures (null != id)
 	 */
 	public Photo() {
 		id = PhotoId.getNextId();
 		incWriteCount();
+		assert (null != id);
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype constructor
+	 * @Requires (null != myId)
 	 */
 	public Photo(PhotoId myId) {
+		assert (null != myId);
 		id = myId;
-		
+
 		incWriteCount();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype constructor
@@ -135,23 +138,35 @@ public class Photo extends DataObject {
 
 	/**
 	 * 
+	 * @methodtype boolean-query
+	 */
+	public boolean hasProperDimensions() {
+		return (width >= 0) && (height >= 0);
+	}
+
+	/**
+	 * 
 	 * @methodtype get
 	 */
 	public String getIdAsString() {
 		return String.valueOf(id.asInt());
 	}
-	
+
 	/**
-	 * 
+	 * @Requires (null != rset)
+	 * @Ensures (null != tags)
 	 */
 	public void readFrom(ResultSet rset) throws SQLException {
+		assert (null != rset);
+
 		id = PhotoId.getId(rset.getInt("id"));
 
 		ownerId = rset.getInt("owner_id");
 		ownerName = rset.getString("owner_name");
-		
+
 		ownerNotifyAboutPraise = rset.getBoolean("owner_notify_about_praise");
-		ownerEmailAddress = EmailAddress.getFromString(rset.getString("owner_email_address"));
+		ownerEmailAddress = EmailAddress.getFromString(rset
+				.getString("owner_email_address"));
 		ownerLanguage = Language.getFromInt(rset.getInt("owner_language"));
 		ownerHomePage = StringUtil.asUrl(rset.getString("owner_home_page"));
 
@@ -167,8 +182,11 @@ public class Photo extends DataObject {
 		creationTime = rset.getLong("creation_time");
 
 		maxPhotoSize = PhotoSize.getFromWidthHeight(width, height);
+
+		assert (null != tags);
+		assert (hasProperDimensions());
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -186,7 +204,7 @@ public class Photo extends DataObject {
 		rset.updateInt("status", status.asInt());
 		rset.updateInt("praise_sum", praiseSum);
 		rset.updateInt("no_votes", noVotes);
-		rset.updateLong("creation_time", creationTime);		
+		rset.updateLong("creation_time", creationTime);
 	}
 
 	/**
@@ -195,7 +213,7 @@ public class Photo extends DataObject {
 	public void writeId(PreparedStatement stmt, int pos) throws SQLException {
 		stmt.setInt(pos, id.asInt());
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -203,24 +221,27 @@ public class Photo extends DataObject {
 	public PhotoId getId() {
 		return id;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
 	 */
 	public int getOwnerId() {
+		assert (ownerId >= 0);
 		return ownerId;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
+	 * @Requires (newId >= 0)
 	 */
 	public void setOwnerId(int newId) {
+		assert (newId >= 0);
 		ownerId = newId;
 		incWriteCount();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -228,7 +249,7 @@ public class Photo extends DataObject {
 	public String getOwnerName() {
 		return ownerName;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
@@ -237,7 +258,7 @@ public class Photo extends DataObject {
 		ownerName = newName;
 		incWriteCount();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -261,7 +282,7 @@ public class Photo extends DataObject {
 	public boolean getOwnerNotifyAboutPraise() {
 		return ownerNotifyAboutPraise;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
@@ -278,12 +299,14 @@ public class Photo extends DataObject {
 	public EmailAddress getOwnerEmailAddress() {
 		return ownerEmailAddress;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
+	 * @Requires (null != newEmailAddress)
 	 */
 	public void setOwnerEmailAddress(EmailAddress newEmailAddress) {
+		assert (null != newEmailAddress);
 		ownerEmailAddress = newEmailAddress;
 		incWriteCount();
 	}
@@ -294,11 +317,12 @@ public class Photo extends DataObject {
 	public Language getOwnerLanguage() {
 		return ownerLanguage;
 	}
-	
+
 	/**
-	 * 
+	 * @Requires (null != newLanguage)
 	 */
 	public void setOwnerLanguage(Language newLanguage) {
+		assert (null != newLanguage);
 		ownerLanguage = newLanguage;
 		incWriteCount();
 	}
@@ -310,7 +334,7 @@ public class Photo extends DataObject {
 	public URL getOwnerHomePage() {
 		return ownerHomePage;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
@@ -319,7 +343,7 @@ public class Photo extends DataObject {
 		ownerHomePage = newHomePage;
 		incWriteCount();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype boolean-query
@@ -333,46 +357,53 @@ public class Photo extends DataObject {
 	 * @methodtype boolean-query
 	 */
 	public boolean isWiderThanHigher() {
+		assert (hasProperDimensions());
 		return (height * MAX_PHOTO_WIDTH) < (width * MAX_PHOTO_HEIGHT);
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
 	 */
 	public int getWidth() {
+		assert (hasProperDimensions());
 		return width;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
 	 */
 	public int getHeight() {
+		assert (hasProperDimensions());
 		return height;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
 	 */
 	public int getThumbWidth() {
-		return isWiderThanHigher() ? MAX_THUMB_PHOTO_WIDTH : (width * MAX_THUMB_PHOTO_HEIGHT / height);
+		return isWiderThanHigher() ? MAX_THUMB_PHOTO_WIDTH : (width
+				* MAX_THUMB_PHOTO_HEIGHT / height);
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
 	 */
 	public int getThumbHeight() {
-		return isWiderThanHigher() ? (height * MAX_THUMB_PHOTO_WIDTH / width) : MAX_THUMB_PHOTO_HEIGHT;
+		return isWiderThanHigher() ? (height * MAX_THUMB_PHOTO_WIDTH / width)
+				: MAX_THUMB_PHOTO_HEIGHT;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
+	 * @Requires (newWidth>=0) && (newHeight>=0)
 	 */
 	public void setWidthAndHeight(int newWidth, int newHeight) {
+		assert (newWidth >= 0) && (newHeight >= 0);
 		width = newWidth;
 		height = newHeight;
 
@@ -380,7 +411,7 @@ public class Photo extends DataObject {
 
 		incWriteCount();
 	}
-	
+
 	/**
 	 * Can this photo satisfy provided photo size?
 	 * 
@@ -389,7 +420,7 @@ public class Photo extends DataObject {
 	public boolean hasPhotoSize(PhotoSize size) {
 		return maxPhotoSize.asInt() >= size.asInt();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -397,7 +428,7 @@ public class Photo extends DataObject {
 	public PhotoSize getMaxPhotoSize() {
 		return maxPhotoSize;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -405,7 +436,7 @@ public class Photo extends DataObject {
 	public double getPraise() {
 		return (double) praiseSum / noVotes;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -413,16 +444,19 @@ public class Photo extends DataObject {
 	public String getPraiseAsString(ModelConfig cfg) {
 		return cfg.asPraiseString(getPraise());
 	}
-	
+
 	/**
-	 * 
+	 * @Requires (value>=0)
+	 * @Ensures (noVotes>0)
 	 */
 	public void addToPraise(int value) {
+		assert (value >= 0);
 		praiseSum += value;
 		noVotes += 1;
 		incWriteCount();
+		assert (noVotes > 0);
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype boolean-query
@@ -430,7 +464,7 @@ public class Photo extends DataObject {
 	public boolean isVisible() {
 		return status.isDisplayable();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -438,16 +472,18 @@ public class Photo extends DataObject {
 	public PhotoStatus getStatus() {
 		return status;
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype set
+	 * @Requires (null != newStatus)
 	 */
 	public void setStatus(PhotoStatus newStatus) {
+		assert (null != newStatus);
 		status = newStatus;
 		incWriteCount();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype boolean-query
@@ -455,7 +491,7 @@ public class Photo extends DataObject {
 	public boolean hasTag(String tag) {
 		return tags.hasTag(tag);
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -467,12 +503,14 @@ public class Photo extends DataObject {
 	/**
 	 * 
 	 * @methodtype set
+	 * @Requires (null != newTags)
 	 */
 	public void setTags(Tags newTags) {
+		assert (null != newTags);
 		tags = newTags;
 		incWriteCount();
 	}
-	
+
 	/**
 	 * 
 	 * @methodtype get
@@ -480,5 +518,5 @@ public class Photo extends DataObject {
 	public long getCreationTime() {
 		return creationTime;
 	}
-	
+
 }

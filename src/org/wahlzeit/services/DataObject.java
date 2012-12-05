@@ -35,7 +35,7 @@ public abstract class DataObject implements Persistent {
 	public static final String ID = "id";
 
 	/**
-	 * 
+	 * @Invariant(writeCount >= 0)
 	 */
 	protected transient int writeCount = 0;
 	
@@ -43,13 +43,15 @@ public abstract class DataObject implements Persistent {
 	 * 
 	 */
 	public final boolean isDirty() {
+		assert (writeCount >= 0);
 		return writeCount != 0;
 	}
-	
+
 	/**
 	 * 
 	 */
 	public final void resetWriteCount() {
+		assert (writeCount >= 0);
 		writeCount = 0;
 	}
 	
@@ -57,6 +59,7 @@ public abstract class DataObject implements Persistent {
 	 * 
 	 */
 	public final void incWriteCount() {
+		assert (writeCount >= 0);
 		writeCount++;
 	}
 	
