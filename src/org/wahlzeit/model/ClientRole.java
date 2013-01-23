@@ -25,8 +25,7 @@ import java.util.List;
 import org.wahlzeit.services.EmailAddress;
 
 public abstract class ClientRole implements Client {
-	
-	
+
 	/**
 	 * 
 	 */

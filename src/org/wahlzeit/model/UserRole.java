@@ -211,9 +211,9 @@ public class UserRole extends ClientRole implements Persistent {
 		id = rset.getInt("id");
 		name = rset.getString("name");
 		nameAsTag = rset.getString("name_as_tag");
-		emailAddress = EmailAddress.getFromString(rset.getString("email_address"));
+		core.emailAddress = EmailAddress.getFromString(rset.getString("email_address"));
 		password = rset.getString("password");
-		rights = AccessRights.getFromInt(rset.getInt("rights"));
+		core.rights = AccessRights.getFromInt(rset.getInt("rights"));
 		language = Language.getFromInt(rset.getInt("language"));
 		notifyAboutPraise = rset.getBoolean("notify_about_praise");
 		homePage = StringUtil.asUrlOrDefault(rset.getString("home_page"), getDefaultHomePage());
@@ -232,9 +232,9 @@ public class UserRole extends ClientRole implements Persistent {
 		rset.updateInt("id", id);
 		rset.updateString("name", name);
 		rset.updateString("name_as_tag", nameAsTag);
-		rset.updateString("email_address", (emailAddress == null) ? "" : emailAddress.asString());
+		rset.updateString("email_address", (core.emailAddress == null) ? "" : core.emailAddress.asString());
 		rset.updateString("password", password);
-		rset.updateInt("rights", rights.asInt());
+		rset.updateInt("rights", core.rights.asInt());
 		rset.updateInt("language", language.asInt());
 		rset.updateBoolean("notify_about_praise", notifyAboutPraise);
 		rset.updateString("home_page", homePage.toString());
@@ -261,7 +261,7 @@ public class UserRole extends ClientRole implements Persistent {
 		
 		for (Iterator<Photo> i = photos.iterator(); i.hasNext(); ) {
 			Photo photo = i.next();
-			photo.setOwnerEmailAddress(emailAddress);
+			photo.setOwnerEmailAddress(core.emailAddress);
 		}
 	}
 	
@@ -467,7 +467,7 @@ public class UserRole extends ClientRole implements Persistent {
 		newPhoto.setOwnerId(id);
 		newPhoto.setOwnerName(name);
 		newPhoto.setOwnerNotifyAboutPraise(notifyAboutPraise);
-		newPhoto.setOwnerEmailAddress(emailAddress);
+		newPhoto.setOwnerEmailAddress(core.emailAddress);
 		newPhoto.setOwnerLanguage(language);
 		newPhoto.setOwnerHomePage(homePage);
 	}
