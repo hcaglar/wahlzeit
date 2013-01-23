@@ -82,7 +82,7 @@ public class ShowUserPhotoFormHandler extends AbstractWebFormHandler {
 		Photo photo = PhotoManager.getPhoto(id);
 
 		UserManager userManager = UserManager.getInstance();
-		User user = userManager.getUserByName(photo.getOwnerName());
+		UserRole userRole = userManager.getUserByName(photo.getOwnerName());
 		if (ctx.isFormType(args, "edit")) {
 			ctx.setPhoto(photo);
 			result = PartUtil.EDIT_USER_PHOTO_PAGE_NAME;
@@ -90,15 +90,15 @@ public class ShowUserPhotoFormHandler extends AbstractWebFormHandler {
 			ctx.setPhoto(photo);
 			result = PartUtil.TELL_FRIEND_PAGE_NAME;
 		} else if (ctx.isFormType(args, "select")) {
-			user.setUserPhoto(photo);
-			userManager.saveUser(user);
+			userRole.setUserPhoto(photo);
+			userManager.saveUser(userRole);
 			UserLog.logPerformedAction("SelectUserPhoto");
 		} else if (ctx.isFormType(args, "delete")) {
 			photo.setStatus(photo.getStatus().asDeleted(true));
-			if (user.getUserPhoto() == photo) {
-				user.setUserPhoto(null);
+			if (userRole.getUserPhoto() == photo) {
+				userRole.setUserPhoto(null);
 			}
-			userManager.saveUser(user);
+			userManager.saveUser(userRole);
 			UserLog.logPerformedAction("DeleteUserPhoto");
 		}
 		

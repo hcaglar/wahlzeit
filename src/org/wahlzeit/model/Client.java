@@ -29,101 +29,68 @@ import org.wahlzeit.services.*;
  * @author dirkriehle
  *
  */
-public abstract class Client {
+public interface Client {
+	
+	/**
+	 * @methodtype get
+	 */
+	public AccessRights getRights();
+	
+	/**
+	 * @methodtype set
+	 */
+	public void setRights(AccessRights newRights);
+	
+	/**
+	 * 
+	 * @methodtype boolean-query
+	 */
+	public boolean hasRights(AccessRights otherRights);
+	
+	/**
+	 * 
+	 * @methodtype boolean-query
+	 */
+	public boolean hasGuestRights();
 	
 	/**
 	 * 
 	 */
-	protected AccessRights rights = AccessRights.NONE;
+	public boolean hasUserRights();
+	
+	/**
+	 * 
+	 * @methodtype boolean-query
+	 */
+	public boolean hasModeratorRights();
+	
+	/**
+	 * 
+	 * @methodtype boolean-query
+	 */
+	public boolean hasAdministratorRights();
+	
+	/**
+	 * 
+	 * @methodtype get
+	 */
+	public EmailAddress getEmailAddress();
+	
+	/**
+	 * 
+	 * @methodtype set
+	 */
+	public void setEmailAddress(EmailAddress newEmailAddress);
+	
+	/**
+	 * @return TODO
+	 * 
+	 */
+	public ClientRole addRole(ClientRole.RoleTypes role);
 	
 	/**
 	 * 
 	 */
-	protected EmailAddress emailAddress = EmailAddress.EMPTY;
-	
-	/**
-	 * 
-	 */
-	protected Client() {
-		// do nothing
-	}
-	
-	/**
-	 * @methodtype initialization
-	 */
-	protected void initialize(AccessRights myRights, EmailAddress myEmailAddress) {
-		rights = myRights;
-		setEmailAddress(myEmailAddress);
-	}
+	public ClientRole getRole(ClientRole.RoleTypes role);
 
-	/**
-	 * @methodtype get
-	 */
-	public AccessRights getRights() {
-		return rights;
-	}
-	
-	/**
-	 * @methodtype set
-	 */
-	public void setRights(AccessRights newRights) {
-		rights = newRights;
-	}
-	
-	/**
-	 * 
-	 * @methodtype boolean-query
-	 */
-	public boolean hasRights(AccessRights otherRights) {
-		return AccessRights.hasRights(rights, otherRights);
-	}
-	
-	/**
-	 * 
-	 * @methodtype boolean-query
-	 */
-	public boolean hasGuestRights() {
-		return hasRights(AccessRights.GUEST);
-	}
-	
-	/**
-	 * 
-	 */
-	public boolean hasUserRights() {
-		return hasRights(AccessRights.USER);
-	}
-	
-	/**
-	 * 
-	 * @methodtype boolean-query
-	 */
-	public boolean hasModeratorRights
-	() {
-		return hasRights(AccessRights.MODERATOR);
-	}
-	
-	/**
-	 * 
-	 * @methodtype boolean-query
-	 */
-	public boolean hasAdministratorRights() {
-		return hasRights(AccessRights.ADMINISTRATOR);
-	}
-	
-	/**
-	 * 
-	 * @methodtype get
-	 */
-	public EmailAddress getEmailAddress() {
-		return emailAddress;
-	}
-	
-	/**
-	 * 
-	 * @methodtype set
-	 */
-	public void setEmailAddress(EmailAddress newEmailAddress) {
-		emailAddress = newEmailAddress;
-	}
-	
 }

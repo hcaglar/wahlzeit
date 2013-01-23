@@ -45,8 +45,8 @@ public class ShowUserHomePageHandler extends AbstractWebPageHandler {
 		Writable part = makeUserProfileForm(ctx);
 		page.addWritable("profile", part);
 		
-		User user = (User) ctx.getClient();
-		Photo[] photos = user.getPhotos();
+		UserRole userRole = (UserRole) ctx.getClient();
+		Photo[] photos = userRole.getPhotos();
 		boolean wasEmpty = true;
 		if (photos.length != 0) {
 			WritableList list = new WritableList();

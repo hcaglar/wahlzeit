@@ -60,7 +60,7 @@ public class SendEmailFormHandler extends AbstractWebFormHandler {
 	 * 
 	 */
 	protected String doHandleGet(UserSession ctx, String link, Map args) {
-		if(!(ctx.getClient() instanceof User)) {
+		if(!(ctx.getClient() instanceof UserRole)) {
 			ctx.setHeading(ctx.cfg().getInformation());
 			ctx.setMessage(ctx.cfg().getNeedToSignupFirst());
 			return PartUtil.SHOW_NOTE_PAGE_NAME;
@@ -83,8 +83,8 @@ public class SendEmailFormHandler extends AbstractWebFormHandler {
 
 		part.maskAndAddString(USER, photo.getOwnerName());
 		
-		User user = (User) ctx.getClient();
-		part.addString(USER_LANGUAGE, ctx.cfg().asValueString(user.getLanguage()));
+		UserRole userRole = (UserRole) ctx.getClient();
+		part.addString(USER_LANGUAGE, ctx.cfg().asValueString(userRole.getLanguage()));
 		
 		part.maskAndAddStringFromArgs(args, EMAIL_SUBJECT);
 		part.maskAndAddStringFromArgs(args, EMAIL_BODY);
@@ -112,8 +112,8 @@ public class SendEmailFormHandler extends AbstractWebFormHandler {
 		}
 
 		UserManager userManager = UserManager.getInstance();
-		User toUser = userManager.getUserByName(photo.getOwnerName());
-		User fromUser = (User) ctx.getClient();
+		UserRole toUser = userManager.getUserByName(photo.getOwnerName());
+		UserRole fromUser = (UserRole) ctx.getClient();
 
 		emailSubject = ctx.cfg().getSendEmailSubjectPrefix() + emailSubject;
 		emailBody = ctx.cfg().getSendEmailBodyPrefix() + emailBody + ctx.cfg().getSendEmailBodyPostfix();

@@ -73,8 +73,8 @@ public class UploadPhotoFormHandler extends AbstractWebFormHandler {
 			String targetFileName = SysConfig.getBackupDirAsString() + photo.getId().asString();
 			createBackup(sourceFileName, targetFileName);
 		
-			User user = (User) ctx.getClient();
-			user.addPhoto(photo); 
+			UserRole userRole = (UserRole) ctx.getClient();
+			userRole.addPhoto(photo); 
 			
 			photo.setTags(new Tags(tags));
 

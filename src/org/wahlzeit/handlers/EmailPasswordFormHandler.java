@@ -48,7 +48,7 @@ public class EmailPasswordFormHandler extends AbstractWebFormHandler {
 	protected void doMakeWebPart(UserSession ctx, WebPart part) {
 		Map<String, Object> savedArgs = ctx.getSavedArgs();
 		part.addStringFromArgs(savedArgs, UserSession.MESSAGE);
-		part.maskAndAddStringFromArgs(savedArgs, User.NAME);
+		part.maskAndAddStringFromArgs(savedArgs, UserRole.NAME);
 	}
 	
 	/**
@@ -57,7 +57,7 @@ public class EmailPasswordFormHandler extends AbstractWebFormHandler {
 	protected String doHandlePost(UserSession ctx, Map args) {
 		UserManager userManager = UserManager.getInstance();	
 
-		String userName = ctx.getAndSaveAsString(args, User.NAME);
+		String userName = ctx.getAndSaveAsString(args, UserRole.NAME);
 		if (StringUtil.isNullOrEmptyString(userName)) {
 			ctx.setMessage(ctx.cfg().getFieldIsMissing());
 			return PartUtil.EMAIL_PASSWORD_PAGE_NAME;
@@ -66,13 +66,13 @@ public class EmailPasswordFormHandler extends AbstractWebFormHandler {
 			return PartUtil.EMAIL_PASSWORD_PAGE_NAME;
 		}
 		
-		User user = userManager.getUserByName(userName);
+		UserRole userRole = userManager.getUserByName(userName);
 		
 		EmailAddress from = ctx.cfg().getModeratorEmailAddress();
-		EmailAddress to = user.getEmailAddress();
+		EmailAddress to = userRole.getEmailAddress();
 
 		EmailService emailService = EmailServiceManager.getDefaultService();
-		emailService.sendEmailIgnoreException(from, to, ctx.cfg().getAuditEmailAddress(), ctx.cfg().getSendPasswordEmailSubject(), user.getPassword());
+		emailService.sendEmailIgnoreException(from, to, ctx.cfg().getAuditEmailAddress(), ctx.cfg().getSendPasswordEmailSubject(), userRole.getPassword());
 
 		UserLog.logPerformedAction("EmailPassword");
 		

@@ -20,21 +20,37 @@
 
 package org.wahlzeit.model;
 
-import org.wahlzeit.services.*;
+import org.wahlzeit.services.EmailAddress;
+
 
 /**
- * A Guest is a client that is not logged in.
+ * An Administrator is a moderator with administration privileges.
  * 
  * @author dirkriehle
  *
  */
-public class Guest extends Client {
+public class AdministratorRole extends ModeratorRole {
 
 	/**
 	 * 
 	 */
-	public Guest() {
-		initialize(AccessRights.GUEST, EmailAddress.EMPTY);
+	public void initialize(String myName, String myPassword, String myEmailAddress, long vc) {
+		initialize(myName, myPassword, EmailAddress.getFromString(myEmailAddress), vc);
 	}
-
+	
+	/**
+	 * 
+	 */
+	public void initialize(String myName, String myPassword, EmailAddress myEmailAddress, long vc) {
+		initialize(AccessRights.ADMINISTRATOR, myEmailAddress, myName, myPassword, vc);
+	}
+	
+	/**
+	 * 
+	 */
+	protected AdministratorRole(ClientCore core) {
+		super(core);
+		// do nothing
+	}
+		
 }

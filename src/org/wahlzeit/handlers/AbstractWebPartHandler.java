@@ -207,7 +207,7 @@ public abstract class AbstractWebPartHandler implements WebPartHandler {
 
 		String msg1 = ctx.cfg().getIllegalArgumentError();
 		String msg2 = ctx.cfg().getContinueWithShowPhoto();
-		if (ctx.getClient() instanceof User) {
+		if (ctx.getClient() instanceof UserRole) {
 			msg2 = ctx.cfg().getContinueWithShowUserHome();
 		}
 		
@@ -224,7 +224,7 @@ public abstract class AbstractWebPartHandler implements WebPartHandler {
 
 		String msg1 = ctx.cfg().getInternalProcessingError();
 		String msg2 = ctx.cfg().getContinueWithShowPhoto();
-		if (ctx.getClient() instanceof User) {
+		if (ctx.getClient() instanceof UserRole) {
 			msg2 = ctx.cfg().getContinueWithShowUserHome();
 		}
 		

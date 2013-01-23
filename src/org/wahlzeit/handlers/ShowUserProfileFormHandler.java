@@ -24,7 +24,7 @@ import java.util.*;
 
 import org.wahlzeit.model.AccessRights;
 import org.wahlzeit.model.Photo;
-import org.wahlzeit.model.User;
+import org.wahlzeit.model.UserRole;
 import org.wahlzeit.model.UserSession;
 import org.wahlzeit.utils.HtmlUtil;
 import org.wahlzeit.webparts.WebPart;
@@ -49,20 +49,20 @@ public class ShowUserProfileFormHandler extends AbstractWebFormHandler {
 	 * 
 	 */
 	protected void doMakeWebPart(UserSession ctx, WebPart part) {
-		User user = (User) ctx.getClient();
+		UserRole userRole = (UserRole) ctx.getClient();
 
-		Photo photo = user.getUserPhoto();
+		Photo photo = userRole.getUserPhoto();
 		part.addString(Photo.THUMB, getPhotoThumb(ctx, photo));
 		
-		part.maskAndAddString(User.NAME, user.getName());
-		part.addString(User.STATUS, ctx.cfg().asValueString(user.getStatus()));
-		part.maskAndAddString(User.EMAIL_ADDRESS, user.getEmailAddress().asString());
-		part.addString(User.MEMBER_SINCE, ctx.cfg().asDateString(user.getCreationTime()));
-		part.addString(User.NOTIFY_ABOUT_PRAISE, ctx.cfg().asYesOrNoString(user.getNotifyAboutPraise()));
-		part.addString(User.HOME_PAGE, HtmlUtil.asHref(user.getHomePage().toString()));
-		part.addString(User.NO_PHOTOS, String.valueOf(user.getNoPhotos()));
-		part.addString(User.GENDER, ctx.cfg().asValueString(user.getGender()));
-		part.addString(User.LANGUAGE, ctx.cfg().asValueString(user.getLanguage()));
+		part.maskAndAddString(UserRole.NAME, userRole.getName());
+		part.addString(UserRole.STATUS, ctx.cfg().asValueString(userRole.getStatus()));
+		part.maskAndAddString(UserRole.EMAIL_ADDRESS, userRole.getEmailAddress().asString());
+		part.addString(UserRole.MEMBER_SINCE, ctx.cfg().asDateString(userRole.getCreationTime()));
+		part.addString(UserRole.NOTIFY_ABOUT_PRAISE, ctx.cfg().asYesOrNoString(userRole.getNotifyAboutPraise()));
+		part.addString(UserRole.HOME_PAGE, HtmlUtil.asHref(userRole.getHomePage().toString()));
+		part.addString(UserRole.NO_PHOTOS, String.valueOf(userRole.getNoPhotos()));
+		part.addString(UserRole.GENDER, ctx.cfg().asValueString(userRole.getGender()));
+		part.addString(UserRole.LANGUAGE, ctx.cfg().asValueString(userRole.getLanguage()));
 	}
 
 	/**

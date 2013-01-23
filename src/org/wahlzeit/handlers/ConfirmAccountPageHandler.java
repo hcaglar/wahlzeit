@@ -62,12 +62,12 @@ public class ConfirmAccountPageHandler extends AbstractWebPageHandler {
 			// NumberFormatException
 		}
 
-		if (client instanceof User) {
-			User user = (User) client;
-			if (user.getConfirmationCode() == confirmationCode) {
-				user.setConfirmed();
+		if (client instanceof UserRole) {
+			UserRole userRole = (UserRole) client;
+			if (userRole.getConfirmationCode() == confirmationCode) {
+				userRole.setConfirmed();
 			} else {
-				UserManager.getInstance().emailConfirmationRequest(ctx, user);
+				UserManager.getInstance().emailConfirmationRequest(ctx, userRole);
 			}
 			ctx.clearConfirmationCode();
 		}
@@ -82,9 +82,9 @@ public class ConfirmAccountPageHandler extends AbstractWebPageHandler {
 		String heading, msg1, msg2 = "";
 		
 		Client client = ctx.getClient();
-		if (client instanceof User) {
-			User user = (User) client;
-			if (user.isConfirmed()) {
+		if (client instanceof UserRole) {
+			UserRole userRole = (UserRole) client;
+			if (userRole.isConfirmed()) {
 				heading = ctx.cfg().getThankYou();
 				msg1 = ctx.cfg().getConfirmAccountSucceeded();
 				msg2 = ctx.cfg().getContinueWithShowUserHome();

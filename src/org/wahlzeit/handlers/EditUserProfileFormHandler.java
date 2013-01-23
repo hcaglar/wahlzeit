@@ -48,29 +48,29 @@ public class EditUserProfileFormHandler extends AbstractWebFormHandler {
 		Map<String, Object> args = ctx.getSavedArgs();
 		part.addStringFromArgs(args, UserSession.MESSAGE);
 
-		User user = (User) ctx.getClient();
-		part.maskAndAddString(User.NAME, user.getName());
+		UserRole userRole = (UserRole) ctx.getClient();
+		part.maskAndAddString(UserRole.NAME, userRole.getName());
 
-		Photo photo = user.getUserPhoto();
+		Photo photo = userRole.getUserPhoto();
 		part.addString(Photo.THUMB, getPhotoThumb(ctx, photo));
-		part.addSelect(User.GENDER, Gender.class, (String) args.get(User.GENDER), user.getGender()); 
-		part.addSelect(User.LANGUAGE, Language.class, (String) args.get(User.LANGUAGE), user.getLanguage());
+		part.addSelect(UserRole.GENDER, Gender.class, (String) args.get(UserRole.GENDER), userRole.getGender()); 
+		part.addSelect(UserRole.LANGUAGE, Language.class, (String) args.get(UserRole.LANGUAGE), userRole.getLanguage());
 		
-		part.maskAndAddStringFromArgsWithDefault(args, User.EMAIL_ADDRESS, user.getEmailAddress().asString());
+		part.maskAndAddStringFromArgsWithDefault(args, UserRole.EMAIL_ADDRESS, userRole.getEmailAddress().asString());
 		
-		part.addString(User.NOTIFY_ABOUT_PRAISE, HtmlUtil.asCheckboxCheck(user.getNotifyAboutPraise()));
+		part.addString(UserRole.NOTIFY_ABOUT_PRAISE, HtmlUtil.asCheckboxCheck(userRole.getNotifyAboutPraise()));
 
-		part.maskAndAddStringFromArgsWithDefault(args, User.HOME_PAGE, user.getHomePage().toString());
+		part.maskAndAddStringFromArgsWithDefault(args, UserRole.HOME_PAGE, userRole.getHomePage().toString());
 	}
 
 	/**
 	 * 
 	 */
 	protected String doHandlePost(UserSession ctx, Map args) {
-		String emailAddress = ctx.getAndSaveAsString(args, User.EMAIL_ADDRESS);
-		String homePage = ctx.getAndSaveAsString(args, User.HOME_PAGE);
-		String gender = ctx.getAndSaveAsString(args, User.GENDER);
-		String language = ctx.getAndSaveAsString(args, User.LANGUAGE);
+		String emailAddress = ctx.getAndSaveAsString(args, UserRole.EMAIL_ADDRESS);
+		String homePage = ctx.getAndSaveAsString(args, UserRole.HOME_PAGE);
+		String gender = ctx.getAndSaveAsString(args, UserRole.GENDER);
+		String language = ctx.getAndSaveAsString(args, UserRole.LANGUAGE);
 		
 		if (!StringUtil.isValidStrictEmailAddress(emailAddress)) {
 			ctx.setMessage(ctx.cfg().getEmailAddressIsInvalid());
@@ -80,28 +80,28 @@ public class EditUserProfileFormHandler extends AbstractWebFormHandler {
 			return PartUtil.EDIT_USER_PROFILE_PAGE_NAME;
 		}
 		
-		User user = (User) ctx.getClient();
+		UserRole userRole = (UserRole) ctx.getClient();
 		
-		user.setEmailAddress(EmailAddress.getFromString(emailAddress));
+		userRole.setEmailAddress(EmailAddress.getFromString(emailAddress));
 	
-		String status = ctx.getAndSaveAsString(args, User.NOTIFY_ABOUT_PRAISE);
+		String status = ctx.getAndSaveAsString(args, UserRole.NOTIFY_ABOUT_PRAISE);
 		boolean notify = (status != null) && status.equals("on");
-		user.setNotifyAboutPraise(notify);
+		userRole.setNotifyAboutPraise(notify);
 
-		user.setHomePage(StringUtil.asUrl(homePage));
+		userRole.setHomePage(StringUtil.asUrl(homePage));
 		
 		if (!StringUtil.isNullOrEmptyString(gender)) {
-			user.setGender(Gender.getFromString(gender));
+			userRole.setGender(Gender.getFromString(gender));
 		}
 		
 		if (!StringUtil.isNullOrEmptyString(language)) {
 			Language langValue = Language.getFromString(language);
 			ctx.setConfiguration(LanguageConfigs.get(langValue));
-			user.setLanguage(langValue);
+			userRole.setLanguage(langValue);
 		}
 		
 		StringBuffer sb = UserLog.createActionEntry("EditUserProfile");
-		UserLog.addUpdatedObject(sb, "User", user.getName());
+		UserLog.addUpdatedObject(sb, "User", userRole.getName());
 		UserLog.log(sb);
 		
 		ctx.setTwoLineMessage(ctx.cfg().getProfileUpdateSucceeded(), ctx.cfg().getContinueWithShowUserHome());

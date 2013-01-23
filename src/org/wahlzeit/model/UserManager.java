@@ -49,7 +49,7 @@ public class UserManager extends ObjectManager {
 	/**
 	 * Maps nameAsTag to user of that name (as tag)
 	 */
-	protected Map<String, User> users = new HashMap<String, User>();
+	protected Map<String, UserRole> userRoles = new HashMap<String, UserRole>();
 	
 	/**
 	 * 
@@ -82,21 +82,21 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public User getUserByName(String name) {
+	public UserRole getUserByName(String name) {
 		return getUserByTag(Tags.asTag(name));
 	}
 	
 	/**
 	 * 
 	 */
-	public User getUserByTag(String tag) {
+	public UserRole getUserByTag(String tag) {
 		assertIsNonNullArgument(tag, "user-by-tag");
 
-		User result = doGetUserByTag(tag);
+		UserRole result = doGetUserByTag(tag);
 
 		if (result == null) {
 			try {
-				result = (User) readObject(getReadingStatement("SELECT * FROM users WHERE name_as_tag = ?"), tag);
+				result = (UserRole) readObject(getReadingStatement("SELECT * FROM users WHERE name_as_tag = ?"), tag);
 			} catch (SQLException sex) {
 				SysLog.logThrowable(sex);
 			}
@@ -112,29 +112,41 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	protected User doGetUserByTag(String tag) {
-		return users.get(tag);
+	protected UserRole doGetUserByTag(String tag) {
+		return userRoles.get(tag);
 	}
 	
 	/**
 	 * 
 	 * @methodtype factory
 	 */
-	protected User createObject(ResultSet rset) throws SQLException {
-		User result = null;
+	protected UserRole createObject(ResultSet rset) throws SQLException {
+		UserRole result = null;
 
 		AccessRights rights = AccessRights.getFromInt(rset.getInt("rights"));
+		ClientRole clientRole;
+		ClientCore clientCore = new ClientCore();
 		if (rights == AccessRights.USER) {
-			result = new User();
+			clientRole = clientCore.addRole(ClientRole.RoleTypes.USER);
+			if(clientRole instanceof UserRole){
+			 result = (UserRole)clientRole;
+			}
 			result.readFrom(rset);
 		} else if (rights == AccessRights.MODERATOR) {
-			result = new Moderator();
+			clientRole = clientCore.addRole(ClientRole.RoleTypes.MODERATOR);
+			if(clientRole instanceof ModeratorRole){
+			 result = (ModeratorRole)clientRole;
+			}
 			result.readFrom(rset);
 		} else if (rights == AccessRights.ADMINISTRATOR) {
-			result = new Administrator();
+			clientRole = clientCore.addRole(ClientRole.RoleTypes.ADMINISTRATOR);
+			if(clientRole instanceof AdministratorRole){
+			 result = (AdministratorRole)clientRole;
+			}
 			result.readFrom(rset);
 		} else {
 			SysLog.logInfo("received NONE rights value");
+			clientCore = null;
 		}
 
 		return result;
@@ -143,62 +155,62 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void addUser(User user) {
-		assertIsNonNullArgument(user);
-		assertIsUnknownUserAsIllegalArgument(user);
+	public void addUser(UserRole userRole) {
+		assertIsNonNullArgument(userRole);
+		assertIsUnknownUserAsIllegalArgument(userRole);
 
 		try {
-			int id = user.getId();
-			createObject(user, getReadingStatement("INSERT INTO users(id) VALUES(?)"), id);
+			int id = userRole.getId();
+			createObject(userRole, getReadingStatement("INSERT INTO users(id) VALUES(?)"), id);
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
 		}
 		
-		doAddUser(user);		
+		doAddUser(userRole);		
 	}
 	
 	/**
 	 * 
 	 */
-	protected void doAddUser(User user) {
-		users.put(user.getNameAsTag(), user);
+	protected void doAddUser(UserRole userRole) {
+		userRoles.put(userRole.getNameAsTag(), userRole);
 	}
 	
 	/**
 	 * 
 	 */
-	public void deleteUser(User user) {
-		assertIsNonNullArgument(user);
-		doDeleteUser(user);
+	public void deleteUser(UserRole userRole) {
+		assertIsNonNullArgument(userRole);
+		doDeleteUser(userRole);
 
 		try {
-			deleteObject(user, getReadingStatement("DELETE FROM users WHERE id = ?"));
+			deleteObject(userRole, getReadingStatement("DELETE FROM users WHERE id = ?"));
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
 		}
 		
-		assertIsUnknownUserAsIllegalState(user);
+		assertIsUnknownUserAsIllegalState(userRole);
 	}
 	
 	/**
 	 * 
 	 */
-	protected void doDeleteUser(User user) {
-		users.remove(user.getNameAsTag());
+	protected void doDeleteUser(UserRole userRole) {
+		userRoles.remove(userRole.getNameAsTag());
 	}
 	
 	/**
 	 * 
 	 */
-	public void loadUsers(Collection<User> result) {
+	public void loadUsers(Collection<UserRole> result) {
 		try {
 			readObjects(result, getReadingStatement("SELECT * FROM users"));
-			for (Iterator<User> i = result.iterator(); i.hasNext(); ) {
-				User user = i.next();
-				if (!doHasUserByTag(user.getNameAsTag())) {
-					doAddUser(user);
+			for (Iterator<UserRole> i = result.iterator(); i.hasNext(); ) {
+				UserRole userRole = i.next();
+				if (!doHasUserByTag(userRole.getNameAsTag())) {
+					doAddUser(userRole);
 				} else {
-					SysLog.logValueWithInfo("user", user.getName(), "user had already been loaded");
+					SysLog.logValueWithInfo("user", userRole.getName(), "user had already been loaded");
 				}
 			}
 		} catch (SQLException sex) {
@@ -218,15 +230,15 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void emailWelcomeMessage(UserSession ctx, User user) {
+	public void emailWelcomeMessage(UserSession ctx, UserRole userRole) {
 		EmailAddress from = ctx.cfg().getAdministratorEmailAddress();
-		EmailAddress to = user.getEmailAddress();
+		EmailAddress to = userRole.getEmailAddress();
 
 		String emailSubject = ctx.cfg().getWelcomeEmailSubject();
 		String emailBody = ctx.cfg().getWelcomeEmailBody() + "\n\n";
-		emailBody += ctx.cfg().getWelcomeEmailUserName() + user.getName() + "\n\n"; 
+		emailBody += ctx.cfg().getWelcomeEmailUserName() + userRole.getName() + "\n\n"; 
 		emailBody += ctx.cfg().getConfirmAccountEmailBody() + "\n\n";
-		emailBody += SysConfig.getSiteUrlAsString() + "confirm?code=" + user.getConfirmationCode() + "\n\n";
+		emailBody += SysConfig.getSiteUrlAsString() + "confirm?code=" + userRole.getConfirmationCode() + "\n\n";
 		emailBody += ctx.cfg().getGeneralEmailRegards() + "\n\n----\n";
 		emailBody += ctx.cfg().getGeneralEmailFooter() + "\n\n";
 
@@ -237,13 +249,13 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void emailConfirmationRequest(UserSession ctx, User user) {
+	public void emailConfirmationRequest(UserSession ctx, UserRole userRole) {
 		EmailAddress from = ctx.cfg().getAdministratorEmailAddress();
-		EmailAddress to = user.getEmailAddress();
+		EmailAddress to = userRole.getEmailAddress();
 
 		String emailSubject = ctx.cfg().getConfirmAccountEmailSubject();
 		String emailBody = ctx.cfg().getConfirmAccountEmailBody() + "\n\n";
-		emailBody += SysConfig.getSiteUrlAsString() + "confirm?code=" + user.getConfirmationCode() + "\n\n";
+		emailBody += SysConfig.getSiteUrlAsString() + "confirm?code=" + userRole.getConfirmationCode() + "\n\n";
 		emailBody += ctx.cfg().getGeneralEmailRegards() + "\n\n----\n";
 		emailBody += ctx.cfg().getGeneralEmailFooter() + "\n\n";
 
@@ -254,9 +266,9 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void saveUser(User user) {
+	public void saveUser(UserRole userRole) {
 		try {
-			updateObject(user, getUpdatingStatement("SELECT * FROM users WHERE id = ?"));
+			updateObject(userRole, getUpdatingStatement("SELECT * FROM users WHERE id = ?"));
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
 		}
@@ -265,9 +277,9 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void removeUser(User user) {
-		saveUser(user);
-		users.remove(user.getNameAsTag());
+	public void removeUser(UserRole userRole) {
+		saveUser(userRole);
+		userRoles.remove(userRole.getNameAsTag());
 	}
 	
 	/**
@@ -275,7 +287,7 @@ public class UserManager extends ObjectManager {
 	 */
 	public void saveUsers() {
 		try {
-			updateObjects(users.values(), getUpdatingStatement("SELECT * FROM users WHERE id = ?"));
+			updateObjects(userRoles.values(), getUpdatingStatement("SELECT * FROM users WHERE id = ?"));
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
 		}
@@ -284,23 +296,23 @@ public class UserManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public User getUserByEmailAddress(String emailAddress) {
+	public UserRole getUserByEmailAddress(String emailAddress) {
 		return getUserByEmailAddress(EmailAddress.getFromString(emailAddress));
 	}
 
 	/**
 	 * 
 	 */
-	public User getUserByEmailAddress(EmailAddress emailAddress) {
-		User result = null;
+	public UserRole getUserByEmailAddress(EmailAddress emailAddress) {
+		UserRole result = null;
 		try {
-			result = (User) readObject(getReadingStatement("SELECT * FROM users WHERE email_address = ?"), emailAddress.asString());
+			result = (UserRole) readObject(getReadingStatement("SELECT * FROM users WHERE email_address = ?"), emailAddress.asString());
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
 		}
 		
 		if (result != null) {
-			User current = doGetUserByTag(result.getNameAsTag());
+			UserRole current = doGetUserByTag(result.getNameAsTag());
 			if (current == null) {
 				doAddUser(result);
 			} else {
@@ -315,9 +327,9 @@ public class UserManager extends ObjectManager {
 	 * 
 	 * @methodtype assertion
 	 */
-	protected void assertIsUnknownUserAsIllegalArgument(User user) {
-		if (hasUserByTag(user.getNameAsTag())) {
-			throw new IllegalArgumentException(user.getName() + "is already known");
+	protected void assertIsUnknownUserAsIllegalArgument(UserRole userRole) {
+		if (hasUserByTag(userRole.getNameAsTag())) {
+			throw new IllegalArgumentException(userRole.getName() + "is already known");
 		}
 	}
 	
@@ -325,9 +337,9 @@ public class UserManager extends ObjectManager {
 	 * 
 	 * @methodtype assertion
 	 */
-	protected void assertIsUnknownUserAsIllegalState(User user) {
-		if (hasUserByTag(user.getNameAsTag())) {
-			throw new IllegalStateException(user.getName() + "should not be known");
+	protected void assertIsUnknownUserAsIllegalState(UserRole userRole) {
+		if (hasUserByTag(userRole.getNameAsTag())) {
+			throw new IllegalStateException(userRole.getName() + "should not be known");
 		}
 	}
 	

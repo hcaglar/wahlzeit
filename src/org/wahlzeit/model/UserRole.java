@@ -36,7 +36,7 @@ import org.wahlzeit.utils.*;
  * @author dirkriehle
  *
  */
-public class User extends Client implements Persistent {
+public class UserRole extends ClientRole implements Persistent {
 	
 	/**
 	 * 
@@ -123,36 +123,37 @@ public class User extends Client implements Persistent {
 	/**
 	 * 
 	 */
-	public User(String myName, String myPassword, String myEmailAddress, long vc) {
-		this(myName, myPassword, EmailAddress.getFromString(myEmailAddress), vc);
+	protected UserRole(ClientCore core) {
+		super(core);
+		// do nothing
 	}
 	
 	/**
 	 * 
 	 */
-	public User(String myName, String myPassword, EmailAddress myEmailAddress, long vc) {
+	public void initialize(String myName, String myPassword, String myEmailAddress, long vc) {
+		initialize(myName, myPassword, EmailAddress.getFromString(myEmailAddress), vc);
+	}
+	
+	/**
+	 * 
+	 */
+	public void initialize(String myName, String myPassword, EmailAddress myEmailAddress, long vc) {
 		initialize(AccessRights.USER, myEmailAddress, myName, myPassword, vc);
 	}
 	
 	/**
 	 * 
 	 */
-	public User(ResultSet rset) throws SQLException {
+	public void initialize(ResultSet rset) throws SQLException {
 		readFrom(rset);
-	}
-	
-	/**
-	 * 
-	 */
-	protected User() {
-		// do nothing
 	}
 
 	/**
 	 * @methodtype initialization
 	 */
 	protected void initialize(AccessRights r, EmailAddress ea, String n, String p, long vc) {
-		super.initialize(r, ea);
+		core.initialize(r, ea);
 		
 		id = getNextUserId();
 		

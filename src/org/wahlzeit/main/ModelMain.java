@@ -69,7 +69,7 @@ public abstract class ModelMain extends AbstractMain {
 		ResultSet result = stmt.executeQuery(query);
 		if (result.next()) {
 			int lastUserId = result.getInt("last_user_id");
-			User.setLastUserId(lastUserId);
+			UserRole.setLastUserId(lastUserId);
 			SysLog.logInfo("loaded global variable lastUserId: " + lastUserId);
 			int lastPhotoId = result.getInt("last_photo_id");
 			PhotoId.setValue(lastPhotoId);
@@ -100,7 +100,7 @@ public abstract class ModelMain extends AbstractMain {
 		Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 		ResultSet rset = stmt.executeQuery(query);
 		if (rset.next()) {
-			int lastUserId = User.getLastUserId();
+			int lastUserId = UserRole.getLastUserId();
 			rset.updateInt("last_user_id", lastUserId);
 			SysLog.logInfo("saved global variable lastUserId: " + lastUserId);
 			int lastPhotoId = PhotoId.getValue();

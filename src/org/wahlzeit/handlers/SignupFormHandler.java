@@ -23,7 +23,9 @@ package org.wahlzeit.handlers;
 import java.util.*;
 
 import org.wahlzeit.model.AccessRights;
-import org.wahlzeit.model.User;
+import org.wahlzeit.model.ClientCore;
+import org.wahlzeit.model.ClientRole;
+import org.wahlzeit.model.UserRole;
 import org.wahlzeit.model.UserLog;
 import org.wahlzeit.model.UserManager;
 import org.wahlzeit.model.UserSession;
@@ -55,22 +57,22 @@ public class SignupFormHandler extends AbstractWebFormHandler {
 		
 //		part.addString(WebContext.MESSAGE, ctx.getMessage());
 		
-		part.addStringFromArgs(args, User.PASSWORD);
-		part.addStringFromArgs(args, User.PASSWORD_AGAIN);
+		part.addStringFromArgs(args, UserRole.PASSWORD);
+		part.addStringFromArgs(args, UserRole.PASSWORD_AGAIN);
 
-		part.maskAndAddStringFromArgs(args, User.NAME);
-		part.maskAndAddStringFromArgsWithDefault(args, User.EMAIL_ADDRESS, ctx.getEmailAddressAsString());
+		part.maskAndAddStringFromArgs(args, UserRole.NAME);
+		part.maskAndAddStringFromArgsWithDefault(args, UserRole.EMAIL_ADDRESS, ctx.getEmailAddressAsString());
 	}
 	
 	/**
 	 * 
 	 */
 	protected String doHandlePost(UserSession ctx, Map args) {
-		String userName = ctx.getAndSaveAsString(args, User.NAME);
-		String password = ctx.getAndSaveAsString(args, User.PASSWORD);
-		String passwordAgain = ctx.getAndSaveAsString(args, User.PASSWORD_AGAIN);
-		String emailAddress = ctx.getAndSaveAsString(args, User.EMAIL_ADDRESS);
-		String terms = ctx.getAndSaveAsString(args, User.TERMS);
+		String userName = ctx.getAndSaveAsString(args, UserRole.NAME);
+		String password = ctx.getAndSaveAsString(args, UserRole.PASSWORD);
+		String passwordAgain = ctx.getAndSaveAsString(args, UserRole.PASSWORD_AGAIN);
+		String emailAddress = ctx.getAndSaveAsString(args, UserRole.EMAIL_ADDRESS);
+		String terms = ctx.getAndSaveAsString(args, UserRole.TERMS);
 		
 		UserManager userManager = UserManager.getInstance();
 		
@@ -107,20 +109,26 @@ public class SignupFormHandler extends AbstractWebFormHandler {
 		}
 
 		long confirmationCode = userManager.createConfirmationCode();
-		User user = new User(userName, password, emailAddress, confirmationCode);
-		userManager.addUser(user);
-		
-		userManager.emailWelcomeMessage(ctx, user);
-		ctx.setClient(user);
-		
-		userManager.saveUser(user);
-		
-		StringBuffer sb = UserLog.createActionEntry("Signup");
-		UserLog.addCreatedObject(sb, "User", userName);
-		UserLog.log(sb);
-		
-		ctx.setTwoLineMessage(ctx.cfg().getConfirmationEmailWasSent(), ctx.cfg().getContinueWithShowUserHome());
+		ClientCore clientCore = new ClientCore();
+		ClientRole clientrole = clientCore.addRole(ClientRole.RoleTypes.USER);
+		if (clientrole instanceof UserRole) {
+			UserRole userRole = (UserRole) clientrole;
+			userRole.initialize(userName, password, emailAddress,
+					confirmationCode);
+			userManager.addUser(userRole);
 
+			userManager.emailWelcomeMessage(ctx, userRole);
+			ctx.setClient(userRole);
+
+			userManager.saveUser(userRole);
+
+			StringBuffer sb = UserLog.createActionEntry("Signup");
+			UserLog.addCreatedObject(sb, "User", userName);
+			UserLog.log(sb);
+
+			ctx.setTwoLineMessage(ctx.cfg().getConfirmationEmailWasSent(), ctx
+					.cfg().getContinueWithShowUserHome());
+		}
 		return PartUtil.SHOW_NOTE_PAGE_NAME;
 	}
 	

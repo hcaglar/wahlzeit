@@ -74,9 +74,17 @@ public class CreateUser extends ModelMain {
 	protected void execute() throws Exception {
 		UserManager userManager = UserManager.getInstance();
 		long confirmationCode = userManager.createConfirmationCode();
-		User user = new User(userName, password, "info@wahlzeit.org", confirmationCode);
-		userManager.addUser(user);
-		
+		ClientCore clientCore = new ClientCore();
+		ClientRole clientrole = clientCore.addRole(ClientRole.RoleTypes.USER);
+		if (!(clientrole instanceof UserRole)) {
+			// error
+			return;
+		}
+		UserRole userRole = (UserRole) clientrole;
+		userRole.initialize(userName, password, "info@wahlzeit.org",
+				confirmationCode);
+		userManager.addUser(userRole);
+
 		PhotoManager photoManager = PhotoManager.getInstance();
 		File photoDirFile = new File(photoDir);
 		FileFilter photoFileFilter = new FileFilter() {
@@ -88,7 +96,7 @@ public class CreateUser extends ModelMain {
 		File[] photoFiles = photoDirFile.listFiles(photoFileFilter);
 		for (int i = 0; i < photoFiles.length; i++) {
 			Photo newPhoto = photoManager.createPhoto(photoFiles[i]);
-			user.addPhoto(newPhoto);
+			userRole.addPhoto(newPhoto);
 		}
 	}
 	
