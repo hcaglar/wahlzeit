@@ -317,7 +317,7 @@ public class PhotoManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	protected void updateDependents(Persistent obj) throws SQLException {
+	protected void updateDependents(PersistentInterface obj) throws SQLException {
 		Photo photo = (Photo) obj;
 		
 		deleteObject(obj, getReadingStatement("DELETE FROM tags WHERE photo_id = ?"));

@@ -32,7 +32,7 @@ import org.wahlzeit.utils.*;
  * @author dirkriehle
  *
  */
-public class Photo extends DataObject {
+public class Photo extends PersistentType {
 
 	/**
 	 * 
@@ -112,6 +112,22 @@ public class Photo extends DataObject {
 	 */
 	public Photo() {
 		id = PhotoId.getNextId();
+		
+		addPersistent(new Persistent("id", Integer.class, "0"));
+		addPersistent(new Persistent("owner_id", Integer.class, "0"));
+		addPersistent(new Persistent("owner_name", String.class, ""));
+		addPersistent(new Persistent("owner_notify_about_praise", Boolean.class, "false"));
+		addPersistent(new Persistent("owner_email_address", String.class, "EmailAddress.EMPTY"));
+		addPersistent(new Persistent("owner_language", Integer.class, "Language.ENGLISH"));
+		addPersistent(new Persistent("owner_home_page", String.class, ""));
+		addPersistent(new Persistent("width", Integer.class, "0"));
+		addPersistent(new Persistent("height", Integer.class, "0"));
+		addPersistent(new Persistent("tags", String.class, "Tags.EMPTY_TAGS"));
+		addPersistent(new Persistent("status", Integer.class, "PhotoStatus.VISIBLE"));
+		addPersistent(new Persistent("praise_sum", Integer.class, "10"));
+		addPersistent(new Persistent("no_votes", Integer.class, "1"));
+		addPersistent(new Persistent("creation_time", Long.class, ""));
+
 		incWriteCount();
 	}
 	
@@ -137,6 +153,14 @@ public class Photo extends DataObject {
 	 * 
 	 * @methodtype get
 	 */
+	public PhotoId getId() {
+		return id;
+	}
+	
+	/**
+	 * 
+	 * @methodtype get
+	 */
 	public String getIdAsString() {
 		return String.valueOf(id.asInt());
 	}
@@ -145,27 +169,16 @@ public class Photo extends DataObject {
 	 * 
 	 */
 	public void readFrom(ResultSet rset) throws SQLException {
-		id = PhotoId.getId(rset.getInt("id"));
-
-		ownerId = rset.getInt("owner_id");
-		ownerName = rset.getString("owner_name");
 		
-		ownerNotifyAboutPraise = rset.getBoolean("owner_notify_about_praise");
+		PersistentReaderWriter.readFrom(rset, this);
+		//todo: extend
+		id = PhotoId.getId(rset.getInt("id"));
 		ownerEmailAddress = EmailAddress.getFromString(rset.getString("owner_email_address"));
 		ownerLanguage = Language.getFromInt(rset.getInt("owner_language"));
 		ownerHomePage = StringUtil.asUrl(rset.getString("owner_home_page"));
-
-		width = rset.getInt("width");
-		height = rset.getInt("height");
-
+		
 		tags = new Tags(rset.getString("tags"));
-
 		status = PhotoStatus.getFromInt(rset.getInt("status"));
-		praiseSum = rset.getInt("praise_sum");
-		noVotes = rset.getInt("no_votes");
-
-		creationTime = rset.getLong("creation_time");
-
 		maxPhotoSize = PhotoSize.getFromWidthHeight(width, height);
 	}
 	
@@ -173,35 +186,14 @@ public class Photo extends DataObject {
 	 * 
 	 */
 	public void writeOn(ResultSet rset) throws SQLException {
+		PersistentReaderWriter.writeOn(rset, this);
+		//todo: extend
 		rset.updateInt("id", id.asInt());
-		rset.updateInt("owner_id", ownerId);
-		rset.updateString("owner_name", ownerName);
-		rset.updateBoolean("owner_notify_about_praise", ownerNotifyAboutPraise);
 		rset.updateString("owner_email_address", ownerEmailAddress.asString());
 		rset.updateInt("owner_language", ownerLanguage.asInt());
 		rset.updateString("owner_home_page", ownerHomePage.toString());
-		rset.updateInt("width", width);
-		rset.updateInt("height", height);
 		rset.updateString("tags", tags.asString());
-		rset.updateInt("status", status.asInt());
-		rset.updateInt("praise_sum", praiseSum);
-		rset.updateInt("no_votes", noVotes);
-		rset.updateLong("creation_time", creationTime);		
-	}
-
-	/**
-	 * 
-	 */
-	public void writeId(PreparedStatement stmt, int pos) throws SQLException {
-		stmt.setInt(pos, id.asInt());
-	}
-	
-	/**
-	 * 
-	 * @methodtype get
-	 */
-	public PhotoId getId() {
-		return id;
+		rset.updateInt("status", status.asInt());	
 	}
 	
 	/**

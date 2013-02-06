@@ -25,13 +25,60 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-public class PersistentType {
+public class PersistentType implements PersistentInterface{
 	
 	protected ArrayList<Persistent> persistentList = new ArrayList<Persistent>();
 	
 	public PersistentType() {
 		
 	}
+	
+	/**
+	 * Not used in the class but needed by broad array of subclasses
+	 */
+	public static String ID = "id";
+
+	/**
+	 * 
+	 */
+	protected transient int writeCount = 0;
+
+	
+	/**
+	 * 
+	 */
+	public boolean isDirty() {
+		return writeCount != 0;
+	}
+	
+	/**
+	 * 
+	 */
+	public final void incWriteCount() {
+		writeCount++;
+	}
+	
+	/**
+	 * 
+	 */
+	public void resetWriteCount() {
+		writeCount = 0;
+	}
+	
+	/**
+	 * 
+	 */
+	public String getIdAsString() {
+		return ID;
+	}
+
+	/**
+	 * 
+	 */
+	public void writeId(PreparedStatement stmt, int pos) throws SQLException {
+		stmt.setString(pos, ID);
+	}
+	
 	
 	/**
 	 * Returns true when persistent obj. is added
@@ -73,5 +120,7 @@ public class PersistentType {
 	 public ArrayList<Persistent> getPersistentList(){
 		 return persistentList;
 	 }
+	 
+	 
 
 }

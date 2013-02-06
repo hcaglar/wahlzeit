@@ -5,12 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface PersistentInterface {
-	public void readFrom(ResultSet rset, PersistentType persType)
-			throws SQLException;
 
-	public void writeOn(ResultSet rset, PersistentType persType)
-			throws SQLException;
-	
 	 
 		/**
 		 * 

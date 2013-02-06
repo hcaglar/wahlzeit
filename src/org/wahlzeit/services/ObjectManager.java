@@ -24,7 +24,7 @@ import java.sql.*;
 import java.util.*;
 
 /**
- * An ObjectManager creates/reads/updates/deletes PersistentType (objects) from a (relational) Database.
+ * An ObjectManager creates/reads/updates/deletes PersistentInterface (objects) from a (relational) Database.
  * It is an abstract superclass that relies an inheritance interface and the PersistentInterface.
  * Subclasses for specific types of object need to implement createObject and provide Statements.
  * 
@@ -60,8 +60,8 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected PersistentType readObject(PreparedStatement stmt, int value) throws SQLException {
-		PersistentType result = null;
+	protected PersistentInterface readObject(PreparedStatement stmt, int value) throws SQLException {
+		PersistentInterface result = null;
 		stmt.setInt(1, value);
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
@@ -75,8 +75,8 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected PersistentType readObject(PreparedStatement stmt, String value) throws SQLException {
-		PersistentType result = null;
+	protected PersistentInterface readObject(PreparedStatement stmt, String value) throws SQLException {
+		PersistentInterface result = null;
 		stmt.setString(1, value);
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
@@ -94,7 +94,7 @@ public abstract class ObjectManager {
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
 		while (rset.next()) {
-			PersistentType obj = createObject(rset);
+			PersistentInterface obj = createObject(rset);
 			result.add(obj);
 		}
 	}
@@ -107,7 +107,7 @@ public abstract class ObjectManager {
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
 		while (rset.next()) {
-			PersistentType obj = createObject(rset);
+			PersistentInterface obj = createObject(rset);
 			result.add(obj);
 		}
 	}
@@ -115,12 +115,12 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected abstract PersistentType createObject(ResultSet rset) throws SQLException;
+	protected abstract PersistentInterface createObject(ResultSet rset) throws SQLException;
 
 	/**
 	 * 
 	 */
-	protected void createObject(PersistentType obj, PreparedStatement stmt, int value) throws SQLException {
+	protected void createObject(PersistentInterface obj, PreparedStatement stmt, int value) throws SQLException {
 		stmt.setInt(1, value);
 		SysLog.logQuery(stmt);
 		stmt.executeUpdate();
@@ -129,7 +129,7 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected void createObject(PersistentType obj, PreparedStatement stmt, String value) throws SQLException {
+	protected void createObject(PersistentInterface obj, PreparedStatement stmt, String value) throws SQLException {
 		stmt.setString(1, value);
 		SysLog.logQuery(stmt);
 		stmt.executeUpdate();
@@ -144,7 +144,7 @@ public abstract class ObjectManager {
 			SysLog.logQuery(stmt);
 			ResultSet rset = stmt.executeQuery();
 			if (rset.next()) {
-				obj.writeOn(rset);
+				PersistentReaderWriter.writeOn(rset, obj);
 				rset.updateRow();
 				updateDependents(obj);
 				obj.resetWriteCount();
@@ -167,14 +167,14 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected void updateDependents(PersistentType obj) throws SQLException {
+	protected void updateDependents(PersistentInterface obj) throws SQLException {
 		// do nothing
 	}
 	
 	/**
 	 * 
 	 */
-	protected void deleteObject(PersistentType obj, PreparedStatement stmt) throws SQLException {
+	protected void deleteObject(PersistentInterface obj, PreparedStatement stmt) throws SQLException {
 		obj.writeId(stmt, 1);
 		SysLog.logQuery(stmt);
 		stmt.executeUpdate();

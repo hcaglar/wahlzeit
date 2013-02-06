@@ -29,7 +29,7 @@ public class PersistentReaderWriter{
 	/**
 	 * 
 	 */
-	public void readFrom(ResultSet rset, PersistentType persType)
+	public static void readFrom(ResultSet rset, PersistentType persType)
 			throws SQLException {
 		Iterator<Persistent> iterator = persType.getPersistentList().iterator();
 		while (iterator.hasNext()) {
@@ -54,7 +54,7 @@ public class PersistentReaderWriter{
 	/**
 	 * 
 	 */
-	public void writeOn(ResultSet rset, PersistentType persType)
+	public static void writeOn(ResultSet rset, PersistentType persType)
 			throws SQLException {
 		Iterator<Persistent> iterator = persType.getPersistentList().iterator();
 		while (iterator.hasNext()) {

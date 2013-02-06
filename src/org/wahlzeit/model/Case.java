@@ -29,7 +29,7 @@ import org.wahlzeit.services.*;
  * @author dirkriehle
  *
  */
-public abstract class Case extends DataObject {
+public abstract class Case extends PersistentType {
 	
 	/**
 	 * 0 is never returned, first value is 1
