@@ -27,7 +27,7 @@ package org.wahlzeit.services;
  * @author dirkriehle
  *
  */
-public abstract class DataObject implements Serializable {
+public abstract class DataObject implements PersistentInterface {
 	
 	/**
 	 * Not used in the class but needed by broad array of subclasses

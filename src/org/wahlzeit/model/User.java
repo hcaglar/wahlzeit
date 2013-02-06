@@ -36,7 +36,7 @@ import org.wahlzeit.utils.*;
  * @author dirkriehle
  *
  */
-public class User extends Client implements Persistent {
+public class User extends Client implements PersistentInterface {
 	
 	/**
 	 * 

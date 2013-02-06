@@ -73,30 +73,5 @@ public class PersistentType {
 	 public ArrayList<Persistent> getPersistentList(){
 		 return persistentList;
 	 }
-	 
-		/**
-		 * 
-		 */
-		public boolean isDirty();
-		
-		/**
-		 * 
-		 */
-		public void incWriteCount();
-		
-		/**
-		 * 
-		 */
-		public void resetWriteCount();
-
-		/**
-		 * 
-		 */
-		public String getIdAsString();
-		
-		/**
-		 * 
-		 */
-		public void writeId(PreparedStatement stmt, int pos) throws SQLException;
 
 }

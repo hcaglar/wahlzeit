@@ -24,8 +24,8 @@ import java.sql.*;
 import java.util.*;
 
 /**
- * An ObjectManager creates/reads/updates/deletes Persistent (objects) from a (relational) Database.
- * It is an abstract superclass that relies an inheritance interface and the Persistent interface.
+ * An ObjectManager creates/reads/updates/deletes PersistentType (objects) from a (relational) Database.
+ * It is an abstract superclass that relies an inheritance interface and the PersistentInterface.
  * Subclasses for specific types of object need to implement createObject and provide Statements.
  * 
  * @author dirkriehle
@@ -33,6 +33,7 @@ import java.util.*;
  */
 public abstract class ObjectManager {
 	
+	protected ArrayList<PersistentType> persistentTypeList = new ArrayList<PersistentType>();
 	/**
 	 * 
 	 */
@@ -59,8 +60,8 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected Persistent readObject(PreparedStatement stmt, int value) throws SQLException {
-		Persistent result = null;
+	protected PersistentType readObject(PreparedStatement stmt, int value) throws SQLException {
+		PersistentType result = null;
 		stmt.setInt(1, value);
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
@@ -74,8 +75,8 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected Persistent readObject(PreparedStatement stmt, String value) throws SQLException {
-		Persistent result = null;
+	protected PersistentType readObject(PreparedStatement stmt, String value) throws SQLException {
+		PersistentType result = null;
 		stmt.setString(1, value);
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
@@ -93,7 +94,7 @@ public abstract class ObjectManager {
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
 		while (rset.next()) {
-			Persistent obj = createObject(rset);
+			PersistentType obj = createObject(rset);
 			result.add(obj);
 		}
 	}
@@ -106,7 +107,7 @@ public abstract class ObjectManager {
 		SysLog.logQuery(stmt);
 		ResultSet rset = stmt.executeQuery();
 		while (rset.next()) {
-			Persistent obj = createObject(rset);
+			PersistentType obj = createObject(rset);
 			result.add(obj);
 		}
 	}
@@ -114,12 +115,12 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected abstract Persistent createObject(ResultSet rset) throws SQLException;
+	protected abstract PersistentType createObject(ResultSet rset) throws SQLException;
 
 	/**
 	 * 
 	 */
-	protected void createObject(Persistent obj, PreparedStatement stmt, int value) throws SQLException {
+	protected void createObject(PersistentType obj, PreparedStatement stmt, int value) throws SQLException {
 		stmt.setInt(1, value);
 		SysLog.logQuery(stmt);
 		stmt.executeUpdate();
@@ -128,7 +129,7 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected void createObject(Persistent obj, PreparedStatement stmt, String value) throws SQLException {
+	protected void createObject(PersistentType obj, PreparedStatement stmt, String value) throws SQLException {
 		stmt.setString(1, value);
 		SysLog.logQuery(stmt);
 		stmt.executeUpdate();
@@ -137,7 +138,7 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected void updateObject(Persistent obj, PreparedStatement stmt) throws SQLException {
+	protected void updateObject(PersistentType obj, PreparedStatement stmt) throws SQLException {
 		if (obj.isDirty()) {
 			obj.writeId(stmt, 1);
 			SysLog.logQuery(stmt);
@@ -158,7 +159,7 @@ public abstract class ObjectManager {
 	 */
 	protected void updateObjects(Collection coll, PreparedStatement stmt) throws SQLException {
 		for (Iterator i = coll.iterator(); i.hasNext(); ) {
-			Persistent obj = (Persistent) i.next();
+			PersistentType obj = (PersistentType) i.next();
 			updateObject(obj, stmt);
 		}
 	}
@@ -166,14 +167,14 @@ public abstract class ObjectManager {
 	/**
 	 * 
 	 */
-	protected void updateDependents(Persistent obj) throws SQLException {
+	protected void updateDependents(PersistentType obj) throws SQLException {
 		// do nothing
 	}
 	
 	/**
 	 * 
 	 */
-	protected void deleteObject(Persistent obj, PreparedStatement stmt) throws SQLException {
+	protected void deleteObject(PersistentType obj, PreparedStatement stmt) throws SQLException {
 		obj.writeId(stmt, 1);
 		SysLog.logQuery(stmt);
 		stmt.executeUpdate();
