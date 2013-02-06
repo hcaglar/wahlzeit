@@ -88,7 +88,7 @@ public class UploadPhotoFormHandler extends AbstractWebFormHandler {
 		} catch (Exception ex) {
 			SysLog.logThrowable(ex);
 			ctx.setMessage(ctx.cfg().getPhotoUploadFailed());
-			throw ex;
+			throw new FailedPhotoCreationException();
 		}
 		
 		return PartUtil.UPLOAD_PHOTO_PAGE_NAME;

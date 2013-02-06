@@ -99,7 +99,7 @@ public class CreateUser extends ModelMain {
 				} catch (SQLException ex) {
 					SysLog.logThrowable(ex);
 					if (exNum++ > maxExceptionNumber) {
-						throw ex;
+						throw new FailedPhotoCreationException();
 					}
 				} catch (Exception ex) {
 					SysLog.logThrowable(ex);
