@@ -95,12 +95,15 @@ public class CreateUser extends ModelMain {
 				try {
 					Photo newPhoto = photoManager.createPhoto(photoFiles[i]);
 					user.addPhoto(newPhoto);
-					break;
-				} catch (Exception ex) {
+					break;//iterate to next photo
+				} catch (SQLException ex) {
 					SysLog.logThrowable(ex);
 					if (exNum++ > maxExceptionNumber) {
 						throw ex;
 					}
+				} catch (Exception ex) {
+					SysLog.logThrowable(ex);
+					throw ex;
 				}
 			}
 		}
