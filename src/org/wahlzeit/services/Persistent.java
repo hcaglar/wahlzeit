@@ -29,41 +29,27 @@ import java.sql.*;
  * @author dirkriehle
  *
  */
-public interface Persistent {
-	
-	/**
-	 * 
-	 */
-	public boolean isDirty();
-	
-	/**
-	 * 
-	 */
-	public void incWriteCount();
-	
-	/**
-	 * 
-	 */
-	public void resetWriteCount();
+public class Persistent {
 
-	/**
-	 * 
-	 */
-	public String getIdAsString();
-	
-	/**
-	 * 
-	 */
-	public void readFrom(ResultSet rset) throws SQLException;
-	
-	/**
-	 * 
-	 */
-	public void writeOn(ResultSet rset) throws SQLException;
-	
-	/**
-	 * 
-	 */
-	public void writeId(PreparedStatement stmt, int pos) throws SQLException;
-	
+	protected PersistentAttribute attr;
+
+	public Persistent(String name, Class type, String value) {
+		attr = new PersistentAttribute(name, type, value);
+	}
+
+	public String getName() {
+		return attr.getName();
+	}
+
+	public Class getType() {
+		return attr.getType();
+	}
+
+	public String getValue() {
+		return attr.getValue();
+	}
+
+	public void setValue(String value) {
+		attr.setValue(value);
+	}
 }

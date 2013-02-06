@@ -20,51 +20,32 @@
 
 package org.wahlzeit.services;
 
-/**
- * A simple abstract implementation of Persistent with write count and dirty bit.
- * Also defines (but does not use) the field "ID" for subclass use.
- * 
- * @author dirkriehle
- *
- */
-public abstract class DataObject implements Serializable {
-	
-	/**
-	 * Not used in the class but needed by broad array of subclasses
-	 */
-	public static final String ID = "id";
+public class PersistentAttribute {
 
-	/**
-	 * 
-	 */
-	protected transient int writeCount = 0;
-	
-	/**
-	 * 
-	 */
-	public final boolean isDirty() {
-		return writeCount != 0;
+	protected String name;
+	protected Class type;
+	protected String value;
+
+	public PersistentAttribute(String name, Class type, String value) {
+		this.type = type;
+		this.name = name;
+		this.value = value;
 	}
-	
-	/**
-	 * 
-	 */
-	public final void resetWriteCount() {
-		writeCount = 0;
+
+	public String getName() {
+		return name;
 	}
-	
-	/**
-	 * 
-	 */
-	public final void incWriteCount() {
-		writeCount++;
+
+	public Class getType() {
+		return type;
 	}
-	
-	/**
-	 * 
-	 */
-	public final void touch() {
-		incWriteCount();
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 }
