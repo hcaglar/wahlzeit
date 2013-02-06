@@ -22,6 +22,9 @@ package org.wahlzeit.model;
 
 import java.sql.*;
 
+import org.wahlzeit.services.Persistent;
+import org.wahlzeit.services.PersistentReaderWriter;
+
 
 /**
  * A photo case is a case where someone flagged a photo as inappropriate.
@@ -54,13 +57,24 @@ public class PhotoCase extends Case {
 	protected boolean wasDecided = false;
 	protected long decidedOn = 0;
 	
+	protected void addPersistents()
+	{
+		addPersistent(new Persistent("id", Integer.class, "0"));
+		addPersistent(new Persistent("photo", Integer.class, "0"));
+		addPersistent(new Persistent("createdOn", Long.class, ""));
+		addPersistent(new Persistent("flagger", String.class, ""));
+		addPersistent(new Persistent("explanation", String.class, ""));
+		addPersistent(new Persistent("wasDecided", Boolean.class, "false"));
+		addPersistent(new Persistent("decidedOn", Long.class, ""));
+	}
+	
 	/**
 	 * 
 	 */
 	public PhotoCase(Photo myPhoto) {
 		id = getNextCaseId();
 		photo = myPhoto;
-		
+		addPersistents();
 		incWriteCount();
 	}
 	
@@ -68,6 +82,7 @@ public class PhotoCase extends Case {
 	 * 
 	 */
 	public PhotoCase(ResultSet rset) throws SQLException {
+		addPersistents();
 		readFrom(rset);
 	}
 	
@@ -82,32 +97,19 @@ public class PhotoCase extends Case {
 	 * 
 	 */
 	public void readFrom(ResultSet rset) throws SQLException {
+		PersistentReaderWriter.readFrom(rset, this);
 		id = new CaseId(rset.getInt("id"));
 		photo = PhotoManager.getPhoto(PhotoId.getId(rset.getInt("photo")));
-		createdOn = rset.getLong("creation_time");
-		
-		flagger = rset.getString("flagger");
 		reason = FlagReason.getFromInt(rset.getInt("reason"));
-		explanation = rset.getString("explanation");
-		
-		wasDecided = rset.getBoolean("was_decided");
-		decidedOn = rset.getLong("decision_time");
 	}
 	
 	/**
 	 * 
 	 */
 	public void writeOn(ResultSet rset) throws SQLException {
+		PersistentReaderWriter.writeOn(rset, this);
 		rset.updateInt("id", id.asInt());
-		rset.updateInt("photo", (photo == null) ? 0 : photo.getId().asInt());
-		rset.updateLong("creation_time", createdOn);
-		
-		rset.updateString("flagger", flagger);
-		rset.updateInt("reason", reason.asInt());
-		rset.updateString("explanation", explanation);
-		
-		rset.updateBoolean("was_decided", wasDecided);
-		rset.updateLong("decision_time", decidedOn);		
+		rset.updateInt("photo", (photo == null) ? 0 : photo.getId().asInt());		
 	}
 	
 	/**

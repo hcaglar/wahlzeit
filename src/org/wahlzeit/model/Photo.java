@@ -107,12 +107,8 @@ public class Photo extends PersistentType {
 	 */
 	protected long creationTime = System.currentTimeMillis();
 	
-	/**
-	 * 
-	 */
-	public Photo() {
-		id = PhotoId.getNextId();
-		
+	protected void addPersistents()
+	{
 		addPersistent(new Persistent("id", Integer.class, "0"));
 		addPersistent(new Persistent("owner_id", Integer.class, "0"));
 		addPersistent(new Persistent("owner_name", String.class, ""));
@@ -127,7 +123,13 @@ public class Photo extends PersistentType {
 		addPersistent(new Persistent("praise_sum", Integer.class, "10"));
 		addPersistent(new Persistent("no_votes", Integer.class, "1"));
 		addPersistent(new Persistent("creation_time", Long.class, ""));
-
+	}
+	/**
+	 * 
+	 */
+	public Photo() {
+		id = PhotoId.getNextId();
+		addPersistents();
 		incWriteCount();
 	}
 	
@@ -137,7 +139,7 @@ public class Photo extends PersistentType {
 	 */
 	public Photo(PhotoId myId) {
 		id = myId;
-		
+		addPersistents();
 		incWriteCount();
 	}
 	
@@ -146,6 +148,7 @@ public class Photo extends PersistentType {
 	 * @methodtype constructor
 	 */
 	public Photo(ResultSet rset) throws SQLException {
+		addPersistents();
 		readFrom(rset);
 	}
 
