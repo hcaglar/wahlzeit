@@ -88,7 +88,7 @@ public abstract class AbstractWebFormHandler extends AbstractWebPartHandler impl
 	/**
 	 * 
 	 */
-	protected String doHandlePost(UserSession ctx, Map args) {
+	protected String doHandlePost(UserSession ctx, Map args) throws Exception {
 		return PartUtil.DEFAULT_PAGE_NAME;
 	}
 	

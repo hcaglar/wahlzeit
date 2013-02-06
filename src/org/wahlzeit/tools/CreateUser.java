@@ -21,7 +21,9 @@
 package org.wahlzeit.tools;
 
 import java.io.*;
+import java.sql.SQLException;
 
+import org.wahlzeit.services.SysLog;
 import org.wahlzeit.utils.*;
 import org.wahlzeit.main.*;
 import org.wahlzeit.model.*;
@@ -47,6 +49,7 @@ public class CreateUser extends ModelMain {
 	protected String userName = "testuser";
 	protected String password = "testuser";
 	protected String photoDir = "config/photos";
+	protected static final int maxExceptionNumber = 3;
 	
 	/**
 	 * 
@@ -87,8 +90,19 @@ public class CreateUser extends ModelMain {
 
 		File[] photoFiles = photoDirFile.listFiles(photoFileFilter);
 		for (int i = 0; i < photoFiles.length; i++) {
-			Photo newPhoto = photoManager.createPhoto(photoFiles[i]);
-			user.addPhoto(newPhoto);
+			int exNum = 0;
+			for (;;) {
+				try {
+					Photo newPhoto = photoManager.createPhoto(photoFiles[i]);
+					user.addPhoto(newPhoto);
+					break;
+				} catch (Exception ex) {
+					SysLog.logThrowable(ex);
+					if (exNum++ > maxExceptionNumber) {
+						throw ex;
+					}
+				}
+			}
 		}
 	}
 	

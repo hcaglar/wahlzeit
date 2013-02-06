@@ -23,6 +23,7 @@ package org.wahlzeit.handlers;
 import java.util.*;
 
 import org.wahlzeit.model.*;
+import org.wahlzeit.services.SysLog;
 import org.wahlzeit.utils.*;
 import org.wahlzeit.webparts.*;
 
@@ -80,26 +81,32 @@ public class EditUserPhotoFormHandler extends AbstractWebFormHandler {
 	/**
 	 * 
 	 */
-	protected String doHandlePost(UserSession ctx, Map args) {
-		String id = ctx.getAndSaveAsString(args, Photo.ID);
-		PhotoManager pm = PhotoManager.getInstance();
-		Photo photo = PhotoManager.getPhoto(id);
+	protected String doHandlePost(UserSession ctx, Map args) throws Exception{
+		try {
+			String id = ctx.getAndSaveAsString(args, Photo.ID);
+			PhotoManager pm = PhotoManager.getInstance();
+			Photo photo = PhotoManager.getPhoto(id);
 
-		String tags = ctx.getAndSaveAsString(args, Photo.TAGS);
-		photo.setTags(new Tags(tags));
+			String tags = ctx.getAndSaveAsString(args, Photo.TAGS);
+			photo.setTags(new Tags(tags));
 
-		String status = ctx.getAndSaveAsString(args, Photo.IS_INVISIBLE);
-		boolean isInvisible = (status != null) && status.equals("on");
-		PhotoStatus ps = photo.getStatus().asInvisible(isInvisible);
-		photo.setStatus(ps);
+			String status = ctx.getAndSaveAsString(args, Photo.IS_INVISIBLE);
+			boolean isInvisible = (status != null) && status.equals("on");
+			PhotoStatus ps = photo.getStatus().asInvisible(isInvisible);
+			photo.setStatus(ps);
 
-		pm.savePhoto(photo);
-		
-		StringBuffer sb = UserLog.createActionEntry("EditUserPhoto");
-		UserLog.addUpdatedObject(sb, "Photo", photo.getId().asString());
-		UserLog.log(sb);
-		
-		ctx.setTwoLineMessage(ctx.cfg().getPhotoUpdateSucceeded(), ctx.cfg().getContinueWithShowUserHome());
+			pm.savePhoto(photo);
+
+			StringBuffer sb = UserLog.createActionEntry("EditUserPhoto");
+			UserLog.addUpdatedObject(sb, "Photo", photo.getId().asString());
+			UserLog.log(sb);
+
+			ctx.setTwoLineMessage(ctx.cfg().getPhotoUpdateSucceeded(), ctx
+					.cfg().getContinueWithShowUserHome());
+		} catch (Exception ex) {
+			SysLog.logThrowable(ex);
+			throw ex;
+		}
 
 		return PartUtil.SHOW_NOTE_PAGE_NAME;
 	}

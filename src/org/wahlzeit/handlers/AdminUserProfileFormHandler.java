@@ -70,7 +70,7 @@ public class AdminUserProfileFormHandler extends AbstractWebFormHandler {
 	/**
 	 * 
 	 */
-	protected String doHandlePost(UserSession ctx, Map args) {
+	protected String doHandlePost(UserSession ctx, Map args) throws Exception {
 		UserManager um = UserManager.getInstance();
 		String userId = ctx.getAndSaveAsString(args, "userId");
 		User user = um.getUserByName(userId);

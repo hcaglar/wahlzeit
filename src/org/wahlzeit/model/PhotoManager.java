@@ -143,7 +143,7 @@ public class PhotoManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void addPhoto(Photo photo) {
+	public void addPhoto(Photo photo) throws SQLException {
 		PhotoId id = photo.getId();
 		assertIsNewPhoto(id);
 		doAddPhoto(photo);
@@ -154,6 +154,7 @@ public class PhotoManager extends ObjectManager {
 			Wahlzeit.saveGlobals();
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
+			throw sex;
 		}
 	}
 	
@@ -190,12 +191,13 @@ public class PhotoManager extends ObjectManager {
 	/**
 	 * 
 	 */
-	public void savePhoto(Photo photo) {
+	public void savePhoto(Photo photo) throws SQLException {
 		try {
 			PreparedStatement stmt = getUpdatingStatement("SELECT * FROM photos WHERE id = ?");
 			updateObject(photo, stmt);
 		} catch (SQLException sex) {
 			SysLog.logThrowable(sex);
+			throw sex;
 		}
 	}
 	
@@ -347,7 +349,12 @@ public class PhotoManager extends ObjectManager {
 	public Photo createPhoto(File file) throws Exception {
 		PhotoId id = PhotoId.getNextId();
 		Photo result = PhotoUtil.createPhoto(file, id);
-		addPhoto(result);
+		try {
+			addPhoto(result);
+		} catch (SQLException sex) {
+			SysLog.logThrowable(sex);
+			throw sex;
+		}
 		return result;
 	}
 	

@@ -56,7 +56,7 @@ public class UploadPhotoFormHandler extends AbstractWebFormHandler {
 	/**
 	 * 
 	 */
-	protected String doHandlePost(UserSession ctx, Map args) {
+	protected String doHandlePost(UserSession ctx, Map args) throws Exception {
 		String tags = ctx.getAndSaveAsString(args, Photo.TAGS);
 
 		if (!StringUtil.isLegalTagsString(tags)) {
@@ -88,6 +88,7 @@ public class UploadPhotoFormHandler extends AbstractWebFormHandler {
 		} catch (Exception ex) {
 			SysLog.logThrowable(ex);
 			ctx.setMessage(ctx.cfg().getPhotoUploadFailed());
+			throw ex;
 		}
 		
 		return PartUtil.UPLOAD_PHOTO_PAGE_NAME;

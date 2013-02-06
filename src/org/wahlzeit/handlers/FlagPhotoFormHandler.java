@@ -68,7 +68,7 @@ public class FlagPhotoFormHandler extends AbstractWebFormHandler {
 	/**
 	 * 
 	 */
-	protected String doHandlePost(UserSession ctx, Map args) {
+	protected String doHandlePost(UserSession ctx, Map args) throws Exception{
 		String id = ctx.getAndSaveAsString(args, Photo.ID);
 		String flagger = ctx.getAndSaveAsString(args, PhotoCase.FLAGGER);
 		FlagReason reason = FlagReason.getFromString(ctx.getAndSaveAsString(args, PhotoCase.REASON));
@@ -85,37 +85,46 @@ public class FlagPhotoFormHandler extends AbstractWebFormHandler {
 			return PartUtil.FLAG_PHOTO_PAGE_NAME;			
 		}
 		
-		Photo photo = PhotoManager.getPhoto(id);
-		photo.setStatus(photo.getStatus().asFlagged(true));
-		PhotoManager pm = PhotoManager.getInstance();
-		pm.savePhoto(photo);
-		
-		PhotoCase photoCase = new PhotoCase(photo);
-		photoCase.setFlagger(flagger);
-		photoCase.setReason(reason);
-		photoCase.setExplanation(explanation);
-		PhotoCaseManager pcm = PhotoCaseManager.getInstance();
-		pcm.addPhotoCase(photoCase);
-		
-		EmailService emailService = EmailServiceManager.getDefaultService();
+		try {
+			Photo photo = PhotoManager.getPhoto(id);
+			photo.setStatus(photo.getStatus().asFlagged(true));
+			PhotoManager pm = PhotoManager.getInstance();
+			pm.savePhoto(photo);
 
-		EmailAddress from = EmailAddress.getFromString(flagger);
-		EmailAddress to = ctx.cfg().getModeratorEmailAddress();
+			PhotoCase photoCase = new PhotoCase(photo);
+			photoCase.setFlagger(flagger);
+			photoCase.setReason(reason);
+			photoCase.setExplanation(explanation);
+			PhotoCaseManager pcm = PhotoCaseManager.getInstance();
+			pcm.addPhotoCase(photoCase);
 
-		String emailSubject = "Photo: " + id + " of user: " + photo.getOwnerName() + " got flagged";
-		String emailBody = "Photo: " + SysConfig.getSiteUrlAsString() + id + ".html\n\n";
-		emailBody += "Reason: " + reason + "\n\n";
-		emailBody += "Explanation: " + explanation + "\n\n";
-		
-		emailService.sendEmailIgnoreException(from, to, ctx.cfg().getAuditEmailAddress(), emailSubject, emailBody);
-		
-		ctx.setEmailAddress(from);
+			EmailService emailService = EmailServiceManager.getDefaultService();
 
-		StringBuffer sb = UserLog.createActionEntry("FlagPhoto");
-		UserLog.addUpdatedObject(sb, "Photo", photo.getId().asString());
-		UserLog.log(sb);
-		
-		ctx.setTwoLineMessage(ctx.cfg().getModeratorWasInformed(), ctx.cfg().getContinueWithShowPhoto());
+			EmailAddress from = EmailAddress.getFromString(flagger);
+			EmailAddress to = ctx.cfg().getModeratorEmailAddress();
+
+			String emailSubject = "Photo: " + id + " of user: "
+					+ photo.getOwnerName() + " got flagged";
+			String emailBody = "Photo: " + SysConfig.getSiteUrlAsString() + id
+					+ ".html\n\n";
+			emailBody += "Reason: " + reason + "\n\n";
+			emailBody += "Explanation: " + explanation + "\n\n";
+
+			emailService.sendEmailIgnoreException(from, to, ctx.cfg()
+					.getAuditEmailAddress(), emailSubject, emailBody);
+
+			ctx.setEmailAddress(from);
+
+			StringBuffer sb = UserLog.createActionEntry("FlagPhoto");
+			UserLog.addUpdatedObject(sb, "Photo", photo.getId().asString());
+			UserLog.log(sb);
+
+			ctx.setTwoLineMessage(ctx.cfg().getModeratorWasInformed(), ctx
+					.cfg().getContinueWithShowPhoto());
+		} catch (Exception ex) {
+			SysLog.logThrowable(ex);
+			throw ex;
+		}
 		
 		return PartUtil.SHOW_NOTE_PAGE_NAME;
 	}

@@ -23,6 +23,7 @@ package org.wahlzeit.handlers;
 import java.util.*;
 
 import org.wahlzeit.model.*;
+import org.wahlzeit.services.SysLog;
 import org.wahlzeit.webparts.*;
 
 /**
@@ -59,23 +60,29 @@ public class AdminUserPhotoFormHandler extends AbstractWebFormHandler {
 	/**
 	 * 
 	 */
-	protected String doHandlePost(UserSession ctx, Map args) {
-		String id = ctx.getAndSaveAsString(args, "photoId");
-		Photo photo = PhotoManager.getPhoto(id);
-	
-		String tags = ctx.getAndSaveAsString(args, Photo.TAGS);
-		photo.setTags(new Tags(tags));
-		String status = ctx.getAndSaveAsString(args, Photo.STATUS);
-		photo.setStatus(PhotoStatus.getFromString(status));
+	protected String doHandlePost(UserSession ctx, Map args) throws Exception{
+		
+		try {
+			String id = ctx.getAndSaveAsString(args, "photoId");
+			Photo photo = PhotoManager.getPhoto(id);
 
-		PhotoManager pm = PhotoManager.getInstance();
-		pm.savePhoto(photo);
-		
-		StringBuffer sb = UserLog.createActionEntry("AdminUserPhoto");
-		UserLog.addUpdatedObject(sb, "Photo", photo.getId().asString());
-		UserLog.log(sb);
-		
-		ctx.setMessage(ctx.cfg().getPhotoUpdateSucceeded());
+			String tags = ctx.getAndSaveAsString(args, Photo.TAGS);
+			photo.setTags(new Tags(tags));
+			String status = ctx.getAndSaveAsString(args, Photo.STATUS);
+			photo.setStatus(PhotoStatus.getFromString(status));
+
+			PhotoManager pm = PhotoManager.getInstance();
+			pm.savePhoto(photo);
+
+			StringBuffer sb = UserLog.createActionEntry("AdminUserPhoto");
+			UserLog.addUpdatedObject(sb, "Photo", photo.getId().asString());
+			UserLog.log(sb);
+
+			ctx.setMessage(ctx.cfg().getPhotoUpdateSucceeded());
+		} catch (Exception ex) {
+			SysLog.logThrowable(ex);
+			throw ex;
+		}
 
 		return PartUtil.SHOW_ADMIN_PAGE_NAME;
 	}
